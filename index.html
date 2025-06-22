@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Water Dash Game</title>
+  <!-- Link to your CSS file -->
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Add Montserrat font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Add supporter image above the game title -->
+  <img src="img/cwsupporter.jpg" alt="charity: water supporter" style="width:120px; margin-top:18px; margin-bottom:8px; border-radius:8px;" />
+
+  <h1>💧 Water Dash Game 💧</h1>
+  <p>Help bring clean water to every villager!</p>
+
+  <div id="info">
+    <div>Score: <span id="score">0</span></div>
+    <div>Strikes: <span id="strikes">0</span></div>
+    <div>Time: <span id="timer">20</span>s</div>
+  </div>
+
+  <div id="levelInfo" style="font-weight:bold; color:#0099ff; margin:10px 0;"></div>
+  <div id="gameContainer">
+    <!-- Game items will be inserted here dynamically -->
+  </div>
+
+  <div id="encouragement" class="encouragement"></div>
+  <div id="waterFact" class="water-fact"></div>
+
+  <p style="color:#0099ff; font-size:1rem; margin:10px 0 0 0;">
+    Tap 💧 to score points. Avoid 🚧 (strike) and 🪣 (lose points)!
+  </p>
+
+  <button id="startBtn">Start Game</button>
+  <!-- Add a Reset button for restarting the game -->
+  <button id="resetBtn">Reset</button>
+
+  <!-- About charity: water section -->
+  <div style="margin:24px auto 0 auto; max-width:420px; background:#fffbe6; border:1px solid #ffe066; border-radius:8px; padding:12px;">
+    <strong>About charity: water</strong><br>
+    charity: water is a nonprofit organization bringing clean and safe drinking water to people in developing countries.<br>
+    <a href="https://www.charitywater.org/" target="_blank" style="color:#0099ff; text-decoration:underline;">Learn more at charitywater.org</a>
+  </div>
+
+  <!-- Intro Modal -->
+  <div id="introModal" class="modal">
+    <div class="modal-content">
+      <p>Welcome! You’ve joined charity: water to help remote villagers. Collect clean water before time runs out and avoid the obstacles!</p>
+      <button onclick="closeIntro()">Got it!</button>
+    </div>
+  </div>
+
+  <!-- Link to your JS file -->
+  <script src="script.js"></script>
+</body>
+</html>
