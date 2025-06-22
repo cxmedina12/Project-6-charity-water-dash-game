@@ -28,12 +28,12 @@ const waterFacts = [
 ];
 
 let score = 0;
-let timer = 20; // Changed from 30 to 20 seconds
+let timer = 30; // Changed from 20 to 30 seconds
 let interval;
 let strikes = 0;
 let gridSize = 25;
 let currentLevel = 1;
-const maxLevel = 5;
+const maxLevel = 4; // Only 4 villager levels now
 const rowSize = 5; // 5 items per row
 
 // Track if water was caught in the current level
@@ -81,12 +81,14 @@ function getLevelSettings(level) {
   if (level === 2) return { waterCount: 2, showTime: 2500, obstacleChance: 0.3 };
   if (level === 3) return { waterCount: 3, showTime: 2000, obstacleChance: 0.4 };
   if (level === 4) return { waterCount: 4, showTime: 1500, obstacleChance: 0.5 };
-  // Level 5
-  return { waterCount: 5, showTime: 1000, obstacleChance: 0.7 };
+  // Default to level 1 settings if level is not 1-4
+  return { waterCount: 1, showTime: 3000, obstacleChance: 0.2 };
 }
 
 // Set up the game grid and start the level
 function setupGame() {
+  // Always show the current time left on the timer at the start of the level
+  timerDisplay.textContent = levelTimeLeft;
   // Clear the board and encouragement
   gameContainer.innerHTML = "";
   encouragementDiv.textContent = "";
@@ -99,20 +101,7 @@ function setupGame() {
   waterToCollect = settings.waterCount * 3; // Require 3 rounds of water collection per drop
   updateLivesDisplay();
   updateScore(0);
-
-  // Start the level timer (20 seconds per level)
-  levelTimeLeft = 20;
-  timerDisplay.textContent = levelTimeLeft;
-  if (interval) clearInterval(interval);
-  interval = setInterval(() => {
-    levelTimeLeft--;
-    timerDisplay.textContent = levelTimeLeft;
-    if (levelTimeLeft <= 0) {
-      clearInterval(interval);
-      endGame(false); // Time's up, game over
-    }
-  }, 1000);
-
+  // Do NOT reset or start the timer here! Timer runs across all levels.
   // Start the water/obstacle appearance loop
   startLevelLoop();
 }
@@ -306,7 +295,7 @@ function handleWaterClick(box, boxes) {
   if (waterCollected >= waterToCollect) {
     // Level complete!
     clearTimeout(levelTimer);
-    clearInterval(interval);
+    // Do NOT clearInterval(interval) here! Timer should keep running across levels.
     levelUpSound.play();
     encouragementDiv.textContent = `Water delivered to Villager ${currentLevel}!`;
     setTimeout(() => {
@@ -376,84 +365,22 @@ function showWaterFact() {
   waterFactDiv.textContent = fact;
 }
 
-// Start the game timer and update the countdown every second
-function startTimer() {
-  timer = 20;
-  timerDisplay.textContent = timer;
-  if (interval) {
-    clearInterval(interval);
-  }
+// Function to start the global game timer (runs once per game)
+function startGlobalTimer() {
+  // Set the timer to 30 seconds at the start
+  levelTimeLeft = 30;
+  timerDisplay.textContent = levelTimeLeft;
+  // Clear any previous timer
+  if (interval) clearInterval(interval);
+  // Start the countdown
   interval = setInterval(() => {
-    timer--;
-    timerDisplay.textContent = timer;
-    if (timer <= 0) {
+    levelTimeLeft--;
+    timerDisplay.textContent = levelTimeLeft;
+    if (levelTimeLeft <= 0) {
       clearInterval(interval);
-      endGame("Time's up! Your final score is " + score);
+      endGame(false); // Time's up, game over
     }
   }, 1000);
-}
-
-// Function to show a simple confetti effect when the player wins
-function showConfetti() {
-  // Create a container for confetti
-  const confettiContainer = document.createElement('div');
-  confettiContainer.style.position = 'fixed';
-  confettiContainer.style.top = '0';
-  confettiContainer.style.left = '0';
-  confettiContainer.style.width = '100vw';
-  confettiContainer.style.height = '100vh';
-  confettiContainer.style.pointerEvents = 'none';
-  confettiContainer.style.zIndex = '2000';
-
-  // Add 40 confetti pieces using emoji
-  for (let i = 0; i < 40; i++) {
-    const confetti = document.createElement('div');
-    const confettiEmojis = ['🎉', '✨', '💧', '🎊', '⭐'];
-    confetti.textContent = confettiEmojis[Math.floor(Math.random() * confettiEmojis.length)];
-    confetti.style.position = 'absolute';
-    confetti.style.left = `${Math.random() * 100}vw`;
-    confetti.style.top = `${-10 + Math.random() * 10}vh`;
-    confetti.style.fontSize = `${1 + Math.random() * 1.5}rem`;
-    confetti.style.opacity = '0.85';
-    confetti.style.transition = 'top 1.5s linear, opacity 1.5s linear';
-    confettiContainer.appendChild(confetti);
-
-    // Animate confetti falling
-    setTimeout(() => {
-      confetti.style.top = `${70 + Math.random() * 25}vh`;
-      confetti.style.opacity = '0';
-    }, 50);
-  }
-
-  document.body.appendChild(confettiContainer);
-
-  // Remove confetti after 1.7 seconds
-  setTimeout(() => {
-    confettiContainer.remove();
-  }, 1700);
-}
-
-// Update the endGame function to show confetti when the player wins
-function endGame(won) {
-  // Stop timers
-  clearInterval(interval);
-  interval = null;
-  clearTimeout(levelTimer);
-  levelTimer = null;
-  moleTimeout = null;
-
-  // Show win or lose message
-  if (won) {
-    showConfetti(); // Show confetti effect
-    encouragementDiv.textContent = "Congratulations! You helped all villagers!";
-  } else {
-    encouragementDiv.textContent = "Game Over! Try again to help the villagers!";
-    // Show a random water fact
-    showWaterFact();
-  }
-
-  // Enable the start button so the player can play again
-  startBtn.disabled = false;
 }
 
 // Event listener for the start button
@@ -461,19 +388,18 @@ startBtn.addEventListener("click", () => {
   // Reset all game state for a new game
   score = 0;
   strikes = 0;
-  timer = 20;
+  timer = 30;
   currentLevel = 1;
   scoreDisplay.textContent = score;
   strikesDisplay.textContent = strikes;
-  timerDisplay.textContent = timer;
   encouragementDiv.textContent = '';
   waterFactDiv.textContent = '';
   lives = 3;
   updateLivesDisplay();
-
   // Disable the start button to prevent re-entry
   startBtn.disabled = true;
-
-  // Start the game setup
+  // Start the global timer ONCE for the whole game
+  startGlobalTimer();
+  // Start the game setup (level)
   setupGame();
 });
